@@ -1,0 +1,1 @@
+//tablo UIının dizaynını buraya çek

@@ -13,6 +13,8 @@ const PatientDataList = () => {
   const page = useSelector((state) => state.patient.page);
   const patientsPage = useSelector((state) => state.patient.patientsPage);
 
+
+  //hooklarıda koddan ayır 
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -83,6 +85,7 @@ const PatientDataList = () => {
     { id: 'phoneNumber', label: 'Phone Number', minWidth: 150 },
     { id: 'address', label: 'Address' },
   ];
+
 
 
   return (
