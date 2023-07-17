@@ -1,52 +1,60 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination } from '@mui/material';
 import Client from 'fhir-kit-client';
+import { setPatients, setNextUrl, setPrevUrl, setPage, setPatientsPage } from './store/modal';
+
 
 const PatientDataList = () => {
-  const [patients, setPatients] = useState([]);
-  const [nextUrl, setNextUrl] = useState('');
-  const [page, setPage] = useState(0);
-  const [patientsPage, setPatientsPage] = useState(10);
+  const dispatch = useDispatch();
+  const patients = useSelector((state) => state.patient.patients);
+  const nextUrl = useSelector((state) => state.patient.nextUrl);
+  const prevUrl = useSelector((state) => state.patient.prevUrl);
+  const page = useSelector((state) => state.patient.page);
+  const patientsPage = useSelector((state) => state.patient.patientsPage);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const url = 'https://hapi.fhir.org/baseR5/Patient?_format=json'
+        const url = 'https://hapi.fhir.org/baseR5/Patient?_format=json';
         const fhirClient = new Client({
-          baseUrl: url
+          baseUrl: url,
         });
 
         const searchResponse = await fhirClient.search({
           resourceType: 'Patient',
-          searchParams: {}
+          searchParams: {},
         });
 
-        const patientsData = searchResponse.entry.map(entry => entry.resource);
-        setPatients(patientsData);
+        const patientsData = searchResponse.entry.map((entry) => entry.resource);
+        dispatch(setPatients(patientsData));
 
-        const nextLink = searchResponse.link.find(link => link.relation === 'next');
-        setNextUrl(nextLink?.url || '');
+        const nextLink = searchResponse.link.find((link) => link.relation === 'next');
+        dispatch(setNextUrl(nextLink?.url || ''));
+        dispatch(setPrevUrl(''));
       } catch (error) {
         console.error('Veri Alinamadi', error);
       }
     };
     fetchData();
-  }, []);
+  }, [dispatch]);
 
-  const fetchNewData = async () => {
+  const fetchNewData = async (url) => {
     try {
-      const url = 'https://hapi.fhir.org/baseR5/Patient?_format=json'
       const fhirClient = new Client({
-        baseUrl: url
+        baseUrl: url,
       });
 
-      const response = await fhirClient.request(nextUrl);
-      const newPatients = patients.concat(response.entry.map(entry => entry.resource));
-      setPatients(newPatients);
+      const response = await fhirClient.request(url);
+      const newPatients = response.entry.map((entry) => entry.resource);
 
-      const nextLink = response.link.find(link => link.relation === 'next');
-      setNextUrl(nextLink?.url || '');
-      setPage(page + 1);
+      dispatch(setPatients(newPatients));
+      const nextLink = response.link.find((link) => link.relation === 'next');
+      const prevLink = response.link.find((link) => link.relation === 'prev');
+
+      dispatch(setNextUrl(nextLink?.url || ''));
+      dispatch(setPrevUrl(prevLink?.url || ''));
+      dispatch(setPage(0));
     } catch (error) {
       console.error('Veri Alinamadi', error);
     }
@@ -54,15 +62,17 @@ const PatientDataList = () => {
 
   const changePage = (event, newPage) => {
     if (newPage > page && nextUrl) {
-      fetchNewData();
+      fetchNewData(nextUrl);
+    } else if (newPage < page && prevUrl) {
+      fetchNewData(prevUrl);
     } else {
-      setPage(newPage);
+      dispatch(setPage(newPage));
     }
   };
 
   const ChangePatients = (event) => {
-    setPatientsPage(+event.target.value);
-    setPage(0);
+    dispatch(setPatientsPage(+event.target.value));
+    dispatch(setPage(0));
   };
 
   const columns = [
@@ -73,6 +83,7 @@ const PatientDataList = () => {
     { id: 'phoneNumber', label: 'Phone Number', minWidth: 150 },
     { id: 'address', label: 'Address' },
   ];
+
 
   return (
     <div>
@@ -92,8 +103,8 @@ const PatientDataList = () => {
                       top: 0,
                       backgroundColor: '#452419',
                       zIndex: 1,
-                      color: 'white', // Yazı rengi beyaz
-                      fontSize: '14px', // Yazı boyutu küçük
+                      color: 'white',
+                      fontSize: '14px',
                     }}
                   >
                     {column.label}
@@ -123,8 +134,8 @@ const PatientDataList = () => {
           </Table>
         </TableContainer>
         <TablePagination
-        sx={{background: '#452419'}}
-        style={{color:'white', fontSize: '14px'}}
+          sx={{ background: '#452419' }}
+          style={{ color: 'white', fontSize: '14px' }}
           rowsPerPageOptions={[10, 20]}
           component="div"
           count={patients.length}
@@ -132,7 +143,14 @@ const PatientDataList = () => {
           page={page}
           onPageChange={changePage}
           onRowsPerPageChange={ChangePatients}
+          nextIconButtonProps={{
+            disabled: !nextUrl
+          }}
+          backIconButtonProps={{
+            disabled: !prevUrl
+          }}
         />
+
       </Paper>
     </div>
   );
