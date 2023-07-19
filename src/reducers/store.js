@@ -3,7 +3,7 @@ import patientReducer from './modal';
 
 const store = configureStore({
   reducer: {
-    patient: patientReducer,
+    patients: patientReducer,
   },
 });
 
