@@ -1,1 +1,0 @@
-//servis kısmını ayır koddan
