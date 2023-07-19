@@ -1,9 +1,8 @@
-// modal.js
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import Client from 'fhir-kit-client';
 
 
-
+//#region fhir kit client ile fetch işlemi ve next, prev url sorgusu
 export const fetchPatientsData = createAsyncThunk(
   'patients/fetchData',
   async (fetchDirection, { getState }) => {
@@ -15,7 +14,6 @@ export const fetchPatientsData = createAsyncThunk(
       } else if (fetchDirection === 'prev') {
         url = getState().patients.prevUrl;
       } else {
-        // If fetchDirection is not provided or invalid, perform the initial fetch
         url = 'https://hapi.fhir.org/baseR5/Patient?_format=json';
       }
 
@@ -35,6 +33,8 @@ export const fetchPatientsData = createAsyncThunk(
     }
   }
 );
+
+//#endregion
 
 const patientSlice = createSlice({
   name: 'patients',
@@ -59,20 +59,28 @@ const patientSlice = createSlice({
   },
   extraReducers: builder => {
     builder
+    //#region Loading Reducer
       .addCase(fetchPatientsData.pending, state => {
         state.status = 'loading';
         state.error = null;
       })
+    //#endregion  
+      
+    //#region Fulfilled Reducer
       .addCase(fetchPatientsData.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.data = action.payload.patientsData;
         state.nextUrl = action.payload.nextUrl;
         state.prevUrl = action.payload.prevUrl;
       })
+    //#endregion
+
+    //#region Rejected Reducer  
       .addCase(fetchPatientsData.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
       });
+    //#endregion  
   },
 });
 
