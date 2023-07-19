@@ -1,6 +1,5 @@
-import { Table } from '@mui/material';
 import React from 'react';
-import {Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination} from '@mui/material';
+import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination} from '@mui/material';
 
 const PatientDataListTable = ({ patients, columns, page, patientsPage, status, error, nextUrl, prevUrl, changePage, ChangePatients }) => {
   return (
