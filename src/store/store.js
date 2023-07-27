@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import patientReducer from './modal';
+import patientReducer from './feature/patient/patientSlicer';
 
 const store = configureStore({
   reducer: {

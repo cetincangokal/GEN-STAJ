@@ -1,14 +1,12 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import Patient from './patient';
-import store from './reducers/store';
+import Patient from './patient'
 
-ReactDOM.render(
-  <Provider store={store}>
+
+function App() {
+  return (
     <div>
       <Patient/>
     </div>
-  </Provider>,
-  document.getElementById('root')
-);
+  );
+}
+
+export default App;

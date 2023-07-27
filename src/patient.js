@@ -1,36 +1,52 @@
-import React, { useEffect } from 'react';
+//patient.js
+
+import React from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchPatientsData, setPage, setPatientsPage } from './reducers/modal';
-import PatientDataListTable from './pages/table';
+import { fetchPatientsData, setPage, setPatientsPage } from './store/feature/patient/patientSlicer';
+import PatientDataListTable from './components/tableComponent';
+
 
 const PatientDataList = () => {
   const dispatch = useDispatch();
-  const { data: patients, nextUrl, prevUrl, page, patientsPage, status, error } = useSelector(state => state.patients);
-
-  //#region UseEffect Hook
+  const { patients, response, nextUrl, prevUrl, totalPatient, page, patientsPage, status, error } = useSelector(state => state.patients);
   useEffect(() => {
-    dispatch(fetchPatientsData());
+    dispatch(fetchPatientsData(''));
   }, [dispatch]);
-  //#endregion
 
-  //#region Sayfada hangi data gösterilecek
-  const changePage = async (event, newPage) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = () => {
+    dispatch(fetchPatientsData({ type: 'search', searchTerm }));
+  };
+
+
+
+
+  const changePage = (event, newPage) => {
     if (newPage > page && nextUrl) {
-      dispatch(fetchPatientsData('next'));
+      dispatch(fetchPatientsData({ type: 'next', bundle: response }))
+        .catch((error) => {
+          console.error("Error fetching next page data:", error);
+        });
     } else if (newPage < page && prevUrl) {
-      dispatch(fetchPatientsData('prev'));
+      dispatch(fetchPatientsData({ type: 'prev', bundle: response }))
+        .catch((error) => {
+          console.error("Error fetching previous page data:", error);
+        });
     } else {
       dispatch(setPage(newPage));
     }
   };
-  //#endregion
 
-  //#region Update Patient
+
+
+
+
   const ChangePatients = (event) => {
     dispatch(setPatientsPage(+event.target.value));
     dispatch(setPage(0));
   };
-  //#endregion
 
   const columns = [
     { id: 'id', label: 'ID', minWidth: 100 },
@@ -42,9 +58,18 @@ const PatientDataList = () => {
   ];
 
   return (
+    <div>
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="Search by name..."
+      />
+      <button onClick={handleSearch}>Search</button>
     <PatientDataListTable
       patients={patients}
       columns={columns}
+      totalPatient={totalPatient}
       page={page}
       patientsPage={patientsPage}
       status={status}
@@ -53,13 +78,10 @@ const PatientDataList = () => {
       prevUrl={prevUrl}
       changePage={changePage}
       ChangePatients={ChangePatients}
+      
     />
+  </div>
   );
 };
 
 export default PatientDataList;
-
-
-
-
-

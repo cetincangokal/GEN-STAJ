@@ -1,10 +1,33 @@
-import React from 'react';
-import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination} from '@mui/material';
 
-const PatientDataListTable = ({ patients, columns, page, patientsPage, status, error, nextUrl, prevUrl, changePage, ChangePatients }) => {
+
+import React ,{useState} from 'react';
+import NewPatientForm from './addPatient';
+import { useDispatch } from 'react-redux';
+import { addPatient } from '../store/feature/patient/patientSlicer';
+
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination } from '@mui/material';
+
+const PatientDataListTable = ({ patients, columns, page, patientsPage, status, totalPatient, error, nextUrl, prevUrl, changePage, ChangePatients }) => {
+  const dispatch = useDispatch();
+
+  const [showAddForm, setShowAddForm] = useState(false);
+  
+  const handleCreatePatient = (patientData) => {
+    dispatch(addPatient(patientData));
+    setShowAddForm(false);
+  };
+  
+  const handleToggleForm = () => {
+    setShowAddForm(!showAddForm);
+  };
+
   return (
     <div>
       <h1>Patients Data</h1>
+      <button onClick={handleToggleForm}>{showAddForm ? 'Cancel' : 'Add Patient'}</button>
+
+      {showAddForm && <NewPatientForm handleCreatePatient={handleCreatePatient} />}
+
       {status === 'loading' && <div>Loading...</div>}
       {status === 'failed' && <div>Error: {error}</div>}
       {status === 'succeeded' && (
@@ -39,7 +62,7 @@ const PatientDataListTable = ({ patients, columns, page, patientsPage, status, e
                     <TableRow key={patient.id} style={{ backgroundColor: '#EDD2CA', borderRadius: '10px' }}>
                       <TableCell>{patient.id || '-'}</TableCell>
                       <TableCell>
-                        {`${patient.name?.[0]?.given?.[0] || '-'} ${patient.name?.[0]?.family || '-'}`}
+                        {`${patient.name?.[0]?.given?.[0] || ''} ${patient.name?.[0]?.family || ''} ${patient.name?.[0].text || ''} `}
                       </TableCell>
                       <TableCell>{patient.gender || '-'}</TableCell>
                       <TableCell>{patient.birthDate || '-'}</TableCell>
@@ -52,15 +75,17 @@ const PatientDataListTable = ({ patients, columns, page, patientsPage, status, e
                       </TableCell>
                     </TableRow>
                   ))}
+
               </TableBody>
+
             </Table>
           </TableContainer>
           <TablePagination
             sx={{ background: '#452419' }}
             style={{ color: 'white', fontSize: '14px' }}
-            rowsPerPageOptions={[10, 20]}
+            rowsPerPageOptions={[20]}
             component="div"
-            count={patients.length}
+            count={totalPatient}
             rowsPerPage={patientsPage}
             page={page}
             onPageChange={changePage}
@@ -71,6 +96,7 @@ const PatientDataListTable = ({ patients, columns, page, patientsPage, status, e
             backIconButtonProps={{
               disabled: !prevUrl
             }}
+
           />
         </Paper>
       )}
