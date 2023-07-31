@@ -1,11 +1,11 @@
 //patient.js
 
+
 import React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchPatientsData, setPage, setPatientsPage } from './store/feature/patient/patientSlicer';
 import PatientDataListTable from './components/tableComponent';
-
 
 const PatientDataList = () => {
   const dispatch = useDispatch();
@@ -14,15 +14,9 @@ const PatientDataList = () => {
     dispatch(fetchPatientsData(''));
   }, [dispatch]);
 
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const handleSearch = () => {
-    dispatch(fetchPatientsData({ type: 'search', searchTerm }));
-  };
 
 
-
-
+//#region Sayfada gösterilecek data
   const changePage = (event, newPage) => {
     if (newPage > page && nextUrl) {
       dispatch(fetchPatientsData({ type: 'next', bundle: response }))
@@ -39,7 +33,7 @@ const PatientDataList = () => {
     }
   };
 
-
+//#endregion
 
 
 
@@ -59,13 +53,7 @@ const PatientDataList = () => {
 
   return (
     <div>
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Search by name..."
-      />
-      <button onClick={handleSearch}>Search</button>
+      
     <PatientDataListTable
       patients={patients}
       columns={columns}

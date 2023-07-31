@@ -1,4 +1,3 @@
-// filter.js
 
 import React from 'react';
 

@@ -11,8 +11,8 @@ const initialState = {
   patients: [],
   response: {},
   nextUrl: null,
-  prevUrl: null, 
-  totalPatient: 0, 
+  prevUrl: null,
+  totalPatient: 0,
   page: 0,
   patientsPage: 20,
   status: 'idle',
@@ -36,19 +36,37 @@ export const fetchPatientsData = createAsyncThunk(
           searchParams: { _total: 'accurate' },
         });
       } else {
-        const [firstName, lastName] = searchTerm.split(' ');
+        const phoneNumberRegex = /^\d{10,}$/;
+        const isPhoneNumber = phoneNumberRegex.test(searchTerm);
+
+        let searchParameters = {};
+
+        if (isPhoneNumber) {
+          searchParameters = {
+            telecom: searchTerm,
+          };
+        } else {
+          const [firstName, lastName] = searchTerm.split(' ');
+          if (!lastName) {
+            searchParameters = { name: firstName };
+          } else {
+            searchParameters = {
+              given: firstName,
+              family: lastName,
+            };
+          }
+        }
+
         response = await client.search({
           resourceType: 'Patient',
           searchParams: {
             _total: 'accurate',
-            given: firstName,
-            family: lastName,
+            ...searchParameters,
           },
         });
-
       }
-     }
-     else {
+    }
+    else {
       response = await client.search({
         resourceType: 'Patient',
         searchParams: { _total: 'accurate' },
@@ -112,12 +130,13 @@ const patientSlice = createSlice({
       state.error = null;
       state.status = 'loading';
     });
+
     builder.addCase(addPatient.fulfilled, (state, action) => {
       state.loading = false;
       state.status = 'succeeded';
-      //Yeni hastayı pushlama
-      state.response.push(action.payload);
+      state.patients.push(action.payload);
     });
+
     builder.addCase(addPatient.rejected, (state, action) => {
       state.loading = false;
       state.error = action.error.message;
