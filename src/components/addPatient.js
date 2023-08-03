@@ -1,23 +1,27 @@
-//addPatient.js
-
 
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { addPatient } from '../store/feature/patient/patientSlicer';
-import { Box, Button, Modal, Typography } from '@mui/material';
+import { Box, Button, MenuItem, Modal, Select, TextField, Typography } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
+
 
 const style = {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: '#7E402B',
-    border: '2px solid #FFFFFF',
+    width: 800,
+    bgcolor: '#75C4E0',
     boxShadow: 24,
     p: 4,
+    display: 'flex',
+    flexDirection: 'row',
+};
 
+const columnStyle = {
+    flex: '1 1 0',
+    padding: '8px',
 };
 
 const NewPatientForm = () => {
@@ -99,7 +103,7 @@ const NewPatientForm = () => {
 
     return (
         <div>
-            <Button onClick={handleOpen} style={{ backgroundColor: '#452419', color: '#FFFFFF' }}>Add Patient</Button>
+            <Button onClick={handleOpen} style={{ backgroundColor: '#4FA4C3', color: '#FFFFFF' }}>Add Patient</Button>
             <Modal
                 open={open}
                 onClose={handleClose}
@@ -107,55 +111,60 @@ const NewPatientForm = () => {
                 aria-describedby="modal-description"
             >
                 <Box sx={style} fontStyle={{ color: '#FFFFFF' }}>
-                    <Typography id="modal-title" variant="h6" component="h2">
-                        Add New Patient:
-                    </Typography>
+                    <div style={columnStyle}>
+                        <Typography id="modal-title" variant="h6" component="h2">
+                            Add New Patient:
+                        </Typography>
+                        <form onSubmit={handleSubmit}>
+                            <div>
+                                <InputLabel style={{ color: '#FFFFFF' }}>Given Name:</InputLabel>
+                                <TextField
+                                    type="text"
+                                    value={givenName}
+                                    onChange={(e) => setGivenName(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <InputLabel style={{ color: '#FFFFFF' }}>Family Name:</InputLabel>
+                                <TextField type="text" value={familyName} onChange={(e) => setFamilyName(e.target.value)} required />
+                            </div>
+
+                            <div>
+                                <InputLabel style={{ color: '#FFFFFF' }}>Use:</InputLabel>
+                                <Select value={use} onChange={(e) => setUse(e.target.value)}>
+                                    <MenuItem value="official">Official</MenuItem>
+                                    <MenuItem value="usual">Usual</MenuItem>
+                                    <MenuItem value="nickname">Nickname</MenuItem>
+                                    <MenuItem value="anonymous">Anonymous</MenuItem>
+                                    <MenuItem value="old">Old</MenuItem>
+                                </Select>
+                            </div>
+
+                            <div>
+                                <InputLabel style={{ color: '#FFFFFF' }}>Gender:</InputLabel>
+                                <Select name='Gender' value={gender || 'unknown'} onChange={(e) => setGender(e.target.value)} required>
+                                    <MenuItem value="unknown">Unknown</MenuItem>
+                                    <MenuItem value="male">Male</MenuItem>
+                                    <MenuItem value="female">Female</MenuItem>
+                                    <MenuItem value="other">Other</MenuItem>
+                                </Select>
+                            </div>
+
+                        </form>
+                    </div>
                     <form onSubmit={handleSubmit}>
-                        <div>
-                            <InputLabel style={{ color: '#FFFFFF' }}>Given Name:</InputLabel>
-                            <input
-                                type="text"
-                                value={givenName}
-                                onChange={(e) => setGivenName(e.target.value)}
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <InputLabel style={{ color: '#FFFFFF' }}>Family Name:</InputLabel>
-                            <input type="text" value={familyName} onChange={(e) => setFamilyName(e.target.value)} required />
-                        </div>
-
-                        <div>
-                            <InputLabel style={{ color: '#FFFFFF' }}>Use:</InputLabel>
-                            <select value={use} onChange={(e) => setUse(e.target.value)}>
-                                <option value="official">Official</option>
-                                <option value="usual">Usual</option>
-                                <option value="nickname">Nickname</option>
-                                <option value="anonymous">Anonymous</option>
-                                <option value="old">Old</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <InputLabel style={{ color: '#FFFFFF' }}>Gender:</InputLabel>
-                            <select value={gender} onChange={(e) => setGender(e.target.value)} required>
-                                <option value="unknown">Unknown</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-
+                      <div style={columnStyle}>
                         <div>
                             <InputLabel style={{ color: '#FFFFFF' }}>Birth Date:</InputLabel>
-                            <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} required />
+                            <TextField type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} required />
                         </div>
                         <div>
                             <InputLabel style={{ color: '#FFFFFF' }}>Phone Numbers:</InputLabel>
                             {telecoms.map((telecom, index) => (
                                 <div key={index}>
-                                    <input
+                                    <TextField
                                         type="text"
                                         value={telecom.value}
                                         onChange={(e) =>
@@ -163,44 +172,44 @@ const NewPatientForm = () => {
                                         }
                                         required
                                     />
-                                    <select
+                                    <Select
                                         value={telecom.use}
                                         onChange={(e) =>
                                             handleTelecomChange(index, 'use', e.target.value)
                                         }
                                     >
-                                        <option value="home">Home</option>
-                                        <option value="work">Work</option>
-                                        <option value="mobile">Mobile</option>
-                                        <option value="old">Old</option>
-                                    </select>
+                                        <MenuItem value="home">Home</MenuItem>
+                                        <MenuItem value="work">Work</MenuItem>
+                                        <MenuItem value="mobile">Mobile</MenuItem>
+                                        <MenuItem value="old">Old</MenuItem>
+                                    </Select>
                                     {index > 0 && (
-                                        <button
+                                        <Button style={{ backgroundColor: '#4FA4C3', color: '#FFFFFF' }}
                                             type="button"
                                             onClick={() => handleRemoveTelecom(index)}
                                         >
                                             Remove
-                                        </button>
+                                        </Button>
                                     )}
                                 </div>
                             ))}
-                            <button type="button" onClick={handleAddTelecom} style={{ backgroundColor: '#452419', color: '#FFFFFF' }}>
+                            <Button type="button" onClick={handleAddTelecom} style={{ backgroundColor: '#4FA4C3', color: '#FFFFFF', margin:'5px' }}>
                                 Add Phone Number
-                            </button>
+                            </Button>
                         </div>
-
                         <div>
                             <InputLabel style={{ color: '#FFFFFF' }}>Address:</InputLabel>
-                            <input
+                            <TextField
                                 type="text"
                                 value={address}
                                 onChange={(e) => setAddress(e.target.value)}
                                 required
                             />
                         </div>
+                        <Button type="submit" style={{ backgroundColor: '#4FA4C3', color: '#FFFFFF', marginTop: '15px', marginLeft: '80px' }}>Create Patient</Button>
 
-                        <Button type="submit" style={{ backgroundColor: '#452419', color: '#FFFFFF' }}>Create Patient</Button>
-                    </form>
+                      </div>
+                    </form>  
                 </Box>
             </Modal>
         </div>

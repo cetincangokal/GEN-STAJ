@@ -1,6 +1,9 @@
+//patientSlicer.js
+
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import Client from 'fhir-kit-client';
+
 
 
 const url = 'https://hapi.fhir.org/baseR5/';
@@ -36,6 +39,7 @@ export const fetchPatientsData = createAsyncThunk(
           searchParams: { _total: 'accurate' },
         });
       } else {
+        //bu kısmı switch case yapmak daha doğru olur galiba
         const phoneNumberRegex = /^\d{10,}$/;
         const isPhoneNumber = phoneNumberRegex.test(searchTerm);
 
@@ -90,6 +94,32 @@ export const addPatient = createAsyncThunk('addPatient', async (patientData) => 
 });
 //#endregion
 
+//#region Hasta silme
+export const deletePatient = createAsyncThunk('deletePatient', async (patientId) => {
+  const response = await client.delete({
+    resourceType: 'Patient',
+    id: patientId,
+  });
+
+  return patientId;
+});
+//#endregion
+
+//#region Update existing patient
+export const updatePatient = createAsyncThunk(
+  'updatePatient',
+  async ({ id, patientData }) => {
+    const response = await client.update({
+      resourceType: 'Patient',
+      id,
+      body: patientData,
+    });
+
+    return response;
+  }
+);
+//#endregion
+
 const patientSlice = createSlice({
   name: 'patients',
   initialState,
@@ -142,6 +172,47 @@ const patientSlice = createSlice({
       state.error = action.error.message;
       state.status = 'failed';
     });
+
+    builder.addCase(deletePatient.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+      state.status = 'loading';
+    });
+
+    builder.addCase(deletePatient.fulfilled, (state, action) => {
+      state.loading = false;
+      state.status = 'succeeded';
+      const deletedPatientId = action.payload;
+      state.patients = state.patients.filter((patient) => patient.id !== deletedPatientId);
+    });
+
+    builder.addCase(deletePatient.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.error.message;
+      state.status = 'failed';
+    });
+    
+    builder.addCase(updatePatient.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+      state.status = 'loading';
+    });
+    
+    builder.addCase(updatePatient.fulfilled, (state, action) => {
+      state.loading = false;
+      state.status = 'succeeded';
+      // Find the updated patient in the state and replace it with the updated data
+      state.patients = state.patients.map((patient) =>
+        patient.id === action.payload.id ? action.payload : patient
+      );
+    });
+
+    builder.addCase(updatePatient.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.error.message;
+      state.status = 'failed';
+    });
+
   },
 });
 
